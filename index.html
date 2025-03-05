@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://fonts.cdnfonts.com/css/gilroy-bold" rel="stylesheet">
+
+    <style>
+        @layer utilities {
+            .font-gilroy-bold {
+                font-family: 'Gilroy-Bold', sans-serif;
+            }
+        }
+
+        .separator::before {
+            content: "or";
+            color: gray;
+            padding: 0px 15px;
+            background: #232121;
+        }
+
+        @media (max-width: 400px) {
+            .separator::before {
+                font-size: 3.3vmin;
+            }
+        }
+
+        /* Dropdown Styles */
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .recent-cities-dropdown {
+            position: absolute;
+            top: 100%; /* Position directly below the input */
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #232121;
+            border-radius: 0 0 4px 4px;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-top: 1px solid #333;
+        }
+
+        .recent-cities-dropdown div {
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .recent-cities-dropdown div:hover {
+            background: #333;
+        }
+
+        /* Scrollbar styling */
+        .recent-cities-dropdown::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .recent-cities-dropdown::-webkit-scrollbar-track {
+            background: #333;
+        }
+
+        .recent-cities-dropdown::-webkit-scrollbar-thumb {
+            background: #50C9C3;
+            border-radius: 4px;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box; /* Ensure padding is included in width */
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen bg-[#121111] overflow-y-auto">
+    <div class="text-white font-gilroy-bold font-[800] text-[3.5vmin] w-full h-[8.8vmin] flex justify-center items-center heading">
+        WeatherDrive <i class='bx bxs-cloud text-white ml-[1vmin] text-[5vmin]'></i>
+    </div>
+
+    <div class="main-content flex w-full h-[calc(100%-8.8vmin)]">
+        <div class="user-input bg-[#232121] flex flex-col p-[3.5vmin] m-[7vmin_4vmin] rounded-[20px] mb-[5vmin] w-[26%] h-[60%]">
+            <p class="font-gilroy-bold text-[3vmin] text-white mb-[6vmin] mt-[2vmin] cityname">Enter a City Name</p>
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    placeholder="Eg. New York,Japan,Tokyo" 
+                    class="h-[7vmin] mb-[5vmin] rounded-[4px] outline-none border-none p-[3vmin]"
+                >
+                <!-- Dropdown will be inserted here by JavaScript -->
+            </div>
+            <button class="bg-[length:200%_auto] bg-gradient-to-r from-[#50C9C3] via-[#96DEDA] to-[#50C9C3] mb-[3vmin] py-[15px] px-[45px] text-center uppercase transition-all duration-500 text-white rounded-[10px] border-none cursor-pointer font-gilroy-bold hover:bg-right search-button">
+                Search
+            </button>
+            <div class="separator w-[99%] bg-gray-500 h-[1px] mb-[2vmin] flex justify-center items-center relative"></div>
+            <button class="bg-[length:200%_auto] bg-gradient-to-r from-[#50C9C3] via-[#96DEDA] to-[#50C9C3] py-[15px] px-[45px] text-center uppercase transition-all duration-500 text-white rounded-[10px] border-none cursor-pointer font-gilroy-bold hover:bg-right currentLocation">
+                Use Current Location
+            </button>
+        </div>
+
+        <div class="weather-details text-white font-gilroy-bold w-[70%]">
+            <div class="display-weather bg-[#232121] mt-[7vmin] rounded-[20px] p-[3.5vmin] mr-[3.5vmin] h-[34%] flex justify-between">
+                <div class="weather-details">
+                    <h2 class="mb-[5vmin]">London (2024-04-04)</h2>
+                    <p class="mb-[3.5vmin]">Temperature: 10.9°C</p>
+                    <p class="mb-[3.5vmin]">Wind: 4.31 M/S</p>
+                    <p class="mb-[3.5vmin]">Humidity: 79%</p>
+                </div>
+                <div class="icon">
+                    <img src="https://openweathermap.org/img/wn/10d@4x.png" alt="weather icon" class="mt-[-4vmin]">
+                    <p class="text-center mt-[-4vmin]">Moderate rain</p>
+                </div>
+            </div>
+
+            <div class="day-forecast mr-[3.5vmin]">
+                <h2 class="mt-[4vmin] ml-[3.5vmin]">5-Day Forecast</h2>
+                <ul class="weather-cards flex gap-[7vmin] mt-[2vmin]">
+                    <!-- Forecast cards will be dynamically inserted here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Responsive Styles -->
+    <style>
+        @media (max-width: 1300px) {
+            .weather-cards {
+                flex-wrap: wrap;
+                gap: 7vmin;
+            }
+            body, html {
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+        }
+        @media (max-width: 870px) {
+            .main-content {
+                flex-wrap: wrap;
+            }
+            .user-input {
+                width: 100%;
+                height: auto;
+            }
+            .weather-details {
+                width: 100%;
+            }
+            .display-weather {
+                height: auto;
+                margin-left: 3.5vmin;
+            }
+            .weather-cards {
+                flex-wrap: wrap;
+                justify-content: space-around;
+                padding-bottom: 6vmin;
+            }
+        }
+        @media (max-width: 400px) {
+            .weather-details p {
+                font-size: 12px;
+            }
+            .weather-details h2 {
+                font-size: 19px;
+            }
+            .user-input button {
+                padding: 9px 45px;
+            }
+            .heading{
+                font-size: 18px;
+                margin-top: 3vmin;
+            }
+            .cityname{
+                font-size: 17px;
+            }
+            .search-container input{
+                height: 11vmin;
+            }
+            .currentLocation{
+                margin-top: 4vmin;
+            }
+            .search-button{
+                margin-top: 3vmin;
+            }
+        }
+    </style>
+    <script src="script.js"></script>
+</body>
+</html>
